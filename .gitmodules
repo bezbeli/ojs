@@ -1,0 +1,3 @@
+[submodule "plugins/themes/healthSciences"]
+	path = plugins/themes/healthSciences
+	url = https://github.com/bezbeli/healthSciences
