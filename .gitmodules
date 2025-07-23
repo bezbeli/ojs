@@ -1,4 +1,0 @@
-[submodule "plugins/themes/healthSciences"]
-	path = plugins/themes/healthSciences
-	url = https://github.com/bezbeli/healthSciences
-	branch = stable-3_5_0
