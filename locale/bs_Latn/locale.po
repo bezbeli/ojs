@@ -1648,7 +1648,7 @@ msgid "current.noCurrentIssueDesc"
 msgstr "Još nije izašao niti jedan broj ovoga časopisa."
 
 msgid "archive.archives"
-msgstr "Arhiva izdanja ."
+msgstr "Arhiva izdanja"
 
 msgid "archive.archivesPageNumber"
 msgstr "Arhive - Stranica {$pageNumber}"
