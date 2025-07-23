@@ -60,6 +60,36 @@ msgstr ""
 msgid "doi.manager.settings.doiCreationTime.copyedit"
 msgstr ""
 
+msgid "manager.website"
+msgstr "Website"
+
+msgid "manager.workflow"
+msgstr "Workflow"
+
+msgid "manager.distribution"
+msgstr "Distribucija"
+
+msgid "navigation.dashboard"
+msgstr "Nadzorna ploča"
+
+msgid "navigation.dashboards"
+msgstr "Nadzorna ploča urednika"
+
+msgid "navigation.access"
+msgstr "Korisnici i uloge"
+
+msgid "navigation.tools"
+msgstr "Alati"
+
+msgid "navigation.admin"
+msgstr "Administracija"
+
+msgid "navigation.settings"
+msgstr "Podešavanje"
+
+msgid "navigation.tools.statistics"
+msgstr "Statistika"
+
 msgid "manager.website.archiving"
 msgstr "Arhiviranje"
 
@@ -1237,6 +1267,12 @@ msgstr "Odaberite sekcije za izračunavanje recenzija statistike ovog časopisa.
 msgid "manager.statistics.statistics.subscriptions"
 msgstr "Pretplata"
 
+msgid "manager.statistics.reports"
+msgstr "Izvještaji"
+
+msgid "manager.statistics.counterR5"
+msgstr "Brojač R5"
+
 msgid "manager.statistics.reports.defaultReport.articleDownloads"
 msgstr "Broj preuzimanja datoteka članka"
 
@@ -2048,6 +2084,9 @@ msgid "manager.setup.notifications.copyPrimaryContact"
 msgstr ""
 "Pošalji kopiju primarnom kontaktu identificiranom u Postavkama časopisa."
 
+msgid "stats.editorialActivity"
+msgstr "Urednička aktivnost"
+
 msgid "stats.contextStats"
 msgstr ""
 
@@ -2240,7 +2279,7 @@ msgid "doi.readerDisplayName"
 msgstr ""
 
 msgid "doi.manager.displayName"
-msgstr ""
+msgstr "DOI"
 
 msgid "doi.manager.settings.description"
 msgstr ""
@@ -2560,6 +2599,9 @@ msgstr ""
 
 #~ msgid "manager.setup.searchEngineIndexing.success"
 #~ msgstr "Postavke indeksiranja za tražilice su ažurirane."
+
+msgid "manager.setup.privacyStatement"
+msgstr "Izjava o privatnosti"
 
 #~ msgid "manager.setup.privacyStatement.success"
 #~ msgstr "Izjava o privatnosti je ažurirana."

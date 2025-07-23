@@ -390,4 +390,52 @@ msgid "submission.submit.form.contributorRoleRequired"
 msgstr "Odaberite ulogu saradnika."
 
 #~ msgid "editor.submission.decision.sendExternalReview"
-#~ msgstr "Pošalji na pregled"
+#~ msgstr "Pošalji na recenziju"
+
+msgid "submission.dashboard.view.assigned"
+msgstr "Dodijeljeno meni"
+
+msgid "submission.dashboard.view.active"
+msgstr "Aktivno"
+
+msgid "submission.dashboard.view.needsEditor"
+msgstr "Treba urednika"
+
+msgid "submission.dashboard.view.submissionStageAll"
+msgstr "U procesu prijave"
+
+msgid "submission.dashboard.view.needsReviews"
+msgstr "Treba recenzije"
+
+msgid "submission.dashboard.view.awaitingReviews"
+msgstr "Čeka recenzije"
+
+msgid "submission.dashboard.view.reviewsSubmitted"
+msgstr "Recenzije poslane"
+
+msgid "submission.dashboard.view.reviewsOverdue"
+msgstr "Zakašnjele recenzije"
+
+msgid "submission.dashboard.view.revisionsSubmitted"
+msgstr "Poslana autorova revizija"
+
+msgid "submission.dashboard.view.reviewAll"
+msgstr "Sve u fazi recenzije"
+
+msgid "submission.dashboard.view.copyediting"
+msgstr "Sve u fazi lektoriranja"
+
+msgid "submission.dashboard.view.production"
+msgstr "Sve u fazi proizvodnje"
+
+msgid "submission.dashboard.view.scheduled"
+msgstr "Planirano za objavu"
+
+msgid "submission.dashboard.view.published"
+msgstr "Objavljeno"
+
+msgid "submission.dashboard.view.declined"
+msgstr "Odbijeno"
+
+msgid "dashboard.startNewSubmission"
+msgstr "Započni novu prijavu"

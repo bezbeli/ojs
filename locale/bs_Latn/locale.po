@@ -36,6 +36,21 @@ msgstr ""
 msgid "reviewer.submission.reviewFormResponse.form.responseRequired"
 msgstr "Molimo ispunite obavezna polja."
 
+msgid "common.editorialMasthead"
+msgstr "Uredništvo"
+
+msgid "common.upload.addFile"
+msgstr "Dodaj sliku"
+
+msgid "common.upload.dragFile"
+msgstr "Prevucite svoju profilnu fotografiju ovdje ili kliknite na Dodaj sliku."
+
+msgid "common.viewProfile"
+msgstr "Moj profil"
+
+msgid "common.filter"
+msgstr "Filtriranje"
+
 msgid "common.software"
 msgstr "Open Journal Systems"
 
@@ -394,6 +409,15 @@ msgstr "Zahtjevana galerija ne može biti pronađena."
 
 msgid "user.noRoles.selectUsersWithoutRoles"
 msgstr "Uključi korisnike bez uloge u ovom časopisu."
+
+msgid "user.profile.identity"
+msgstr "Identitet"
+
+msgid "user.profile.contact"
+msgstr "Kontakt"
+
+msgid "user.profile.public"
+msgstr "Javno"
 
 msgid "user.profile.profileImage"
 msgstr "Slika profila"
@@ -1571,6 +1595,9 @@ msgstr ""
 "\"socijalna\".</li>\n"
 "</ul>"
 
+msgid "search.advancedFilters"
+msgstr "Uredi uslove pretrage"
+
 msgid "article.pageTitle"
 msgstr "Pregled {$title}"
 
@@ -2429,6 +2456,9 @@ msgstr "Budući brojevi"
 msgid "navigation.subscriptions"
 msgstr "Pretplate"
 
+msgid "navigation.archives"
+msgstr "Arhiva"
+
 msgid "log.editor.submissionExpedited"
 msgstr ""
 "{$editorName} je preuzeo/la postupak uređivanja članka {$submissionId}."
@@ -2444,3 +2474,10 @@ msgstr "Odaberite kako želite rasporediti članke u ovoj kategoriji."
 
 #~ msgid "category.category"
 #~ msgstr "Kategorije"
+
+msgid "navigation.breadcrumbSeparator"
+msgstr "/"
+
+msgid "common.homepageNavigationLabel"
+msgstr "Naslovnica"
+

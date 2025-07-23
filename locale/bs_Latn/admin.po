@@ -163,6 +163,57 @@ msgstr "Nema evidentiranih korisnika."
 msgid "admin.scheduledTask.subscriptionExpiryReminder"
 msgstr "Podsjetnik na istek pretplate"
 
+msgid "notification.notifications"
+msgstr "Obavijesti"
+
+msgid "notification.allow"
+msgstr "Omogući ove vrste obavještenja."
+
+msgid "notification.email"
+msgstr "Nemojte mi slati e-poruke za ove vrste obavijesti."
+
+msgid "notification.type.openAccess"
+msgstr "Broj je postao otvorenog pristupa."
+
+msgid "notification.type.queryAdded"
+msgstr "Dodana je rasprava"
+
+msgid "notification.type.queryActivity"
+msgstr "Aktivnost u raspravi"
+
+msgid "notification.type.reviewerComment"
+msgstr "Recenzent je komentarisao na Naslov"
+
+msgid "notification.type.editorialReminder"
+msgstr "Sedmični e-mail s preostalim zadacima"
+
+msgid "notification.type.editorialReport"
+msgstr "Sažetak statističkog izvještaja"
+
+msgid "user.role.editors"
+msgstr "Urednici"
+
+msgid "user.preferredAvatarInitials"
+msgstr "Inicijali koje želite koristiti."
+
+msgid "user.preferredAvatarInitials.description"
+msgstr "Unesite inicijale koje želite koristiti kao avatar. Ovi inicijali će se prikazivati kao vaši predstavnici."
+
+msgid "user.privacyLink"
+msgstr "Vaši podaci se čuvaju u skladu s našom izjavom o privatnosti."
+
+msgid "user.apiKey"
+msgstr "API"
+
+msgid "user.apiKey.generate"
+msgstr "Generiši API ključ"
+
+msgid "user.apiKey.remove"
+msgstr "Ukloni API ključ"
+
+msgid "notification.settingsDescription"
+msgstr "Odaberite sistemske događaje o kojima želite primati obavještenja. Ako poništite odabir neke stavke, obavještenja o tom događaju neće se prikazivati u sistemu niti će vam biti poslana e-poštom. Ako ostavite stavku označenu, obavještenje će se prikazati u sistemu, a dodatno ćete imati opciju da odlučite želite li isto obavještenje primati i putem e-pošte."
+
 msgid "admin.scheduledTask.openAccessNotification"
 msgstr "Obavijest o otvorenom pristupu"
 

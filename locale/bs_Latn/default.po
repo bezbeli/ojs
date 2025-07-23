@@ -165,6 +165,12 @@ msgstr "Recenzent"
 msgid "default.groups.plural.externalReviewer"
 msgstr "Recenzenti"
 
+msgid "default.groups.name.reader"
+msgstr "Čitalac"
+
+msgid "default.groups.name.author"
+msgstr "Autor"
+
 msgid "default.groups.abbrev.externalReviewer"
 msgstr "R"
 
