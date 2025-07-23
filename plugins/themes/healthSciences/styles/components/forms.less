@@ -1,0 +1,34 @@
+::placeholder {
+	color: #fff;
+	font-style: italic;
+}
+
+legend {
+	margin: 3rem 0;
+	font-size: 1.25rem;
+	text-transform: uppercase;
+}
+
+.form-group {
+	margin-bottom: 3rem;
+}
+
+.form-control {
+	border: none;
+	border-bottom: 1px solid;
+	border-radius: 0;
+	-webkit-appearance: none;
+}
+
+.form-check-input:checked {
+	background-color: @primary;
+	border-color: @primary-link;
+
+	&[type="checkbox"] {
+		background-image: @check-image-url;
+	}
+}
+
+.form-check {
+	line-height: 1.5rem;
+}
