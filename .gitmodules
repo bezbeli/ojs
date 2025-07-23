@@ -1,0 +1,2 @@
+[submodule "lib/pkp"]
+	url = https://github.com/bezbeli/pkp-lib.git
