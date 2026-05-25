@@ -11,6 +11,8 @@
  * dispatcher to delegate to the appropriate request handler.
  */
 
+require_once __DIR__ . '/includes/apply-local-debug.php';
+
 use APP\core\Application;
 
 // Initialize global environment

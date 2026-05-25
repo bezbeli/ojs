@@ -13,5 +13,7 @@
  *  to index.php for web requests).
  */
 
+require dirname(__FILE__, 2) . '/includes/apply-local-debug.php';
+
 define('INDEX_FILE_LOCATION', dirname(__FILE__, 2) . '/index.php');
 require dirname(__FILE__, 2) . '/lib/pkp/classes/cliTool/CommandLineTool.php';

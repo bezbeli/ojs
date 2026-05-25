@@ -13,6 +13,7 @@
  *
  */
 
+require_once('OpenGraph.inc.php');
 require_once('HealthSciencesThemePlugin.inc.php');
 
 return new HealthSciencesThemePlugin();

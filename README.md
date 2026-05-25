@@ -13,6 +13,65 @@ Read one of these guides to get started using OJS:
 
 Visit our [Documentation Hub](https://docs.pkp.sfu.ca/) for user guides, tutorials, and technical documentation.
 
+## Production deployment (Laravel Forge)
+
+This site is deployed to [Laravel Forge](https://forge.laravel.com/) at `ojs.zemaljskimuzej.ba`. The application root on the server is `/home/forge/ojs.zemaljskimuzej.ba/ojs`.
+
+### Prerequisites
+
+- Git branch: `stable-3_5_0` (or the branch configured in Forge as `$FORGE_SITE_BRANCH`)
+- Node.js and npm (for Vite asset builds)
+- Composer (Forge provides `$FORGE_COMPOSER`)
+- PHP-FPM (Forge provides `$FORGE_PHP_FPM`)
+
+This repository uses **Git submodules** for `lib/pkp`, plugins, and other dependencies. A deploy must update submodules after `git pull`, not just the main repository.
+
+Nginx configuration for this site is documented in [`README_NGINX.md`](README_NGINX.md).
+
+### Forge deployment script
+
+Paste the following into **Forge → Site → Deployment Script**. The same script is kept in [`scripts/forge-deploy.sh`](scripts/forge-deploy.sh).
+
+```bash
+set -euo pipefail
+
+cd /home/forge/ojs.zemaljskimuzej.ba/ojs
+
+git pull origin $FORGE_SITE_BRANCH
+git submodule sync --recursive
+git submodule update --init --recursive
+
+$FORGE_COMPOSER --working-dir=lib/pkp install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+$FORGE_COMPOSER --working-dir=plugins/generic/citationStyleLanguage install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+$FORGE_COMPOSER --working-dir=plugins/paymethod/paypal install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+HUSKY=0 npm ci
+npm run build
+
+php tools/upgrade.php upgrade
+
+find cache/t_compile -mindepth 1 -delete 2>/dev/null || true
+find cache/opcache -mindepth 1 -delete 2>/dev/null || true
+
+( flock -w 10 9 || exit 1
+    echo 'Restarting FPM...'; sudo -S service $FORGE_PHP_FPM reload ) 9>/tmp/fpmlock
+```
+
+### What each step does
+
+1. **Git pull + submodules** — updates application code, PKP library, and plugin submodules.
+2. **Composer** — installs PHP dependencies for PKP, Citation Style Language, and PayPal payment plugins.
+3. **npm ci + build** — installs Node dependencies and compiles frontend/backend assets with Vite. `HUSKY=0` skips Git hooks on the server.
+4. **upgrade.php** — runs database migrations when the application version has changed.
+5. **Cache clear** — removes compiled templates and OPcache files so theme/plugin changes take effect.
+6. **PHP-FPM reload** — reloads PHP so OPcache picks up changed files.
+
+### Notes
+
+- `config.inc.php`, uploaded files, and the public files directory live outside Git and are not affected by deploys.
+- Keep the Forge site PHP version and nginx `fastcgi_pass` socket aligned (both should use the same PHP version).
+- For syncing production data to a local Herd environment, use the `sync.sh` script in the parent project directory.
+
 ## Requirements
 
 <details>

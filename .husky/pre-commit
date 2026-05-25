@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Local PHP (Herd 8.4+) may exceed php-cs-fixer's supported range in OJS 3.5.
+export PHP_CS_FIXER_IGNORE_ENV=1
+
 npx lint-staged
