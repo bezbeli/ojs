@@ -9,7 +9,7 @@
 use APP\core\Application;
 use APP\file\PublicFileManager;
 use APP\template\TemplateManager;
-use PKP\core\PKPApplication;
+use PKP\facades\Locale;
 use PKP\i18n\LocaleConversion;
 
 class HealthSciencesOpenGraph
@@ -40,23 +40,20 @@ class HealthSciencesOpenGraph
         $publicationLocale = $publication->getData('locale');
         $title = $publication->getLocalizedFullTitle($publicationLocale);
         $description = self::truncateDescription((string) ($publication->getLocalizedData('abstract', $publicationLocale) ?: ''));
-        $articleBestId = strlen($urlPath = (string) $publication->getData('urlPath')) ? $urlPath : $article->getId();
-        $url = $request->getDispatcher()->url(
-            $request,
-            PKPApplication::ROUTE_PAGE,
-            null,
-            'article',
-            'view',
-            [$articleBestId],
-            urlLocaleForPage: ''
-        );
+        $url = $request->getRequestUrl();
 
         $image = $publication->getLocalizedCoverImageUrl($journal->getId());
+        $imageFilename = '';
+        if ($image) {
+            $coverImage = $publication->getLocalizedData('coverImage');
+            $imageFilename = $coverImage['uploadName'] ?? '';
+        }
         if (!$image && $issue) {
             $image = $issue->getLocalizedCoverImageUrl();
+            $imageFilename = (string) ($issue->getLocalizedCoverImage() ?: '');
         }
         if (!$image) {
-            $image = self::getJournalImageUrl($request, $journal);
+            $image = self::getJournalImageUrl($request, $journal, $imageFilename);
         }
 
         self::outputTags($templateMgr, [
@@ -64,9 +61,10 @@ class HealthSciencesOpenGraph
             'description' => $description,
             'url' => $url,
             'image' => $image,
+            'imageMeta' => self::getImageMeta($journal->getId(), $imageFilename),
             'type' => 'article',
             'siteName' => $journal->getLocalizedName(),
-            'locale' => LocaleConversion::toBcp47($publicationLocale),
+            'locale' => LocaleConversion::toBcp47(Locale::getLocale()),
         ]);
 
         return false;
@@ -112,21 +110,17 @@ class HealthSciencesOpenGraph
             $description = (string) ($journal->getLocalizedData('searchDescription') ?: '');
         }
         $description = self::truncateDescription($description);
-        $url = $request->getDispatcher()->url(
-            $request,
-            PKPApplication::ROUTE_PAGE,
-            null,
-            $journal->getPath(),
-            urlLocaleForPage: ''
-        );
-        $image = self::getJournalImageUrl($request, $journal);
-        $locale = LocaleConversion::toBcp47($journal->getPrimaryLocale());
+        $url = $request->getRequestUrl();
+        $imageFilename = '';
+        $image = self::getJournalImageUrl($request, $journal, $imageFilename);
+        $locale = LocaleConversion::toBcp47(Locale::getLocale());
 
         self::outputTags($templateMgr, [
             'title' => $title,
             'description' => $description,
             'url' => $url,
             'image' => $image,
+            'imageMeta' => self::getImageMeta($journal->getId(), $imageFilename),
             'type' => 'website',
             'siteName' => $title,
             'locale' => $locale,
@@ -149,26 +143,23 @@ class HealthSciencesOpenGraph
         if ($issue->hasDescription()) {
             $description = self::truncateDescription((string) $issue->getLocalizedDescription());
         }
-        $url = $request->getDispatcher()->url(
-            $request,
-            PKPApplication::ROUTE_PAGE,
-            null,
-            'issue',
-            'view',
-            [$issue->getBestIssueId()],
-            urlLocaleForPage: ''
-        );
+        if ($description === '') {
+            $description = self::truncateDescription($title);
+        }
+        $url = $request->getRequestUrl();
+        $imageFilename = (string) ($issue->getLocalizedCoverImage() ?: '');
         $image = $issue->getLocalizedCoverImageUrl();
         if (!$image) {
-            $image = self::getJournalImageUrl($request, $journal);
+            $image = self::getJournalImageUrl($request, $journal, $imageFilename);
         }
-        $locale = LocaleConversion::toBcp47($journal->getPrimaryLocale());
+        $locale = LocaleConversion::toBcp47(Locale::getLocale());
 
         self::outputTags($templateMgr, [
             'title' => $title,
             'description' => $description,
             'url' => $url,
             'image' => $image,
+            'imageMeta' => self::getImageMeta($journal->getId(), $imageFilename),
             'type' => 'website',
             'siteName' => $journal->getLocalizedName(),
             'locale' => $locale,
@@ -189,6 +180,18 @@ class HealthSciencesOpenGraph
 
         if (!empty($data['image'])) {
             self::addPropertyMeta($templateMgr, 'ogImage', 'og:image', $data['image']);
+            if (str_starts_with($data['image'], 'https://')) {
+                self::addPropertyMeta($templateMgr, 'ogImageSecure', 'og:image:secure_url', $data['image']);
+            }
+            if (!empty($data['imageMeta']['width'])) {
+                self::addPropertyMeta($templateMgr, 'ogImageWidth', 'og:image:width', (string) $data['imageMeta']['width']);
+            }
+            if (!empty($data['imageMeta']['height'])) {
+                self::addPropertyMeta($templateMgr, 'ogImageHeight', 'og:image:height', (string) $data['imageMeta']['height']);
+            }
+            if (!empty($data['imageMeta']['mime'])) {
+                self::addPropertyMeta($templateMgr, 'ogImageType', 'og:image:type', $data['imageMeta']['mime']);
+            }
         }
 
         $twitterCard = !empty($data['image']) ? 'summary_large_image' : 'summary';
@@ -235,26 +238,56 @@ class HealthSciencesOpenGraph
             return $text;
         }
 
-        return mb_substr($text, 0, $maxLength - 1) . '…';
+        return mb_substr($text, 0, $maxLength - 1) . '';
     }
 
     /**
      * @param \APP\core\Request $request
      * @param \APP\journal\Journal $journal
      */
-    protected static function getJournalImageUrl($request, $journal): string
+    protected static function getJournalImageUrl($request, $journal, string &$filename = ''): string
     {
         $homepageImage = $journal->getLocalizedData('homepageImage');
         if ($homepageImage && !empty($homepageImage['uploadName'])) {
-            return self::getContextFileUrl($request, $journal->getId(), $homepageImage['uploadName']);
+            $filename = $homepageImage['uploadName'];
+
+            return self::getContextFileUrl($request, $journal->getId(), $filename);
         }
 
         $logo = $journal->getLocalizedData('pageHeaderLogoImage');
         if ($logo && !empty($logo['uploadName'])) {
-            return self::getContextFileUrl($request, $journal->getId(), $logo['uploadName']);
+            $filename = $logo['uploadName'];
+
+            return self::getContextFileUrl($request, $journal->getId(), $filename);
         }
 
+        $filename = '';
+
         return '';
+    }
+
+    protected static function getImageMeta(int $contextId, string $filename): array
+    {
+        if ($filename === '') {
+            return [];
+        }
+
+        $publicFileManager = new PublicFileManager();
+        $path = $publicFileManager->getContextFilesPath($contextId) . '/' . $filename;
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $info = @getimagesize($path);
+        if (!$info) {
+            return [];
+        }
+
+        return [
+            'width' => $info[0],
+            'height' => $info[1],
+            'mime' => $info['mime'],
+        ];
     }
 
     /**
