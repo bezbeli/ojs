@@ -9,11 +9,47 @@
 use APP\core\Application;
 use APP\file\PublicFileManager;
 use APP\template\TemplateManager;
+use PKP\core\Core;
+use PKP\core\PKPSessionGuard;
 use PKP\facades\Locale;
 use PKP\i18n\LocaleConversion;
 
 class HealthSciencesOpenGraph
 {
+    /**
+     * Align session locale with the locale in the URL before PKPPageRouter::_setLocale().
+     * Prevents a 302 redirect loop on /en/... URLs when the journal primary locale is bs_Latn.
+     *
+     * @return bool
+     */
+    public static function syncLocaleFromUrl($hookName, $args)
+    {
+        if (PKPSessionGuard::isSessionDisable()) {
+            return false;
+        }
+
+        $request = Application::get()->getRequest();
+        $pathInfo = $_SERVER['PATH_INFO'] ?? '';
+        if ($pathInfo === '') {
+            $pathInfo = $request->getRequestPath();
+        }
+
+        $urlLocale = Core::getLocalization($pathInfo);
+        if (!$urlLocale || !Locale::isSupported($urlLocale)) {
+            return false;
+        }
+
+        $session = $request->getSession();
+        if ($session->get('currentLocale') !== $urlLocale) {
+            $session->put('currentLocale', $urlLocale);
+            $request->setCookieVar('currentLocale', $urlLocale);
+        }
+
+        Locale::setLocale($urlLocale);
+
+        return false;
+    }
+
     /**
      * Inject Open Graph tags on article pages.
      *

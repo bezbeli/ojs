@@ -114,6 +114,7 @@ class HealthSciencesThemePlugin extends ThemePlugin
         HookRegistry::add('TemplateManager::display', [$this, 'loadTemplateData']);
         HookRegistry::add('TemplateManager::display', ['HealthSciencesOpenGraph', 'addTemplateTags']);
         HookRegistry::add('ArticleHandler::view', ['HealthSciencesOpenGraph', 'addArticleTags']);
+        HookRegistry::add('LoadHandler', ['HealthSciencesOpenGraph', 'syncLocaleFromUrl']);
     }
 
     /**
