@@ -1,2 +1,4 @@
 User-agent: *
 Disallow: /cache/
+
+Sitemap: https://ojs.zemaljskimuzej.ba/index.php/index/bs_Latn/sitemap

@@ -16,14 +16,65 @@
 
 namespace APP\pages\sitemap;
 
+use APP\core\Request;
 use APP\facades\Repo;
 use APP\issue\Collector;
 use APP\submission\Submission;
+use DOMDocument;
 use PKP\pages\sitemap\PKPSitemapHandler;
 use PKP\plugins\Hook;
 
 class SitemapHandler extends PKPSitemapHandler
 {
+    /**
+     * @copydoc PKPSitemapHandler::index()
+     */
+    public function index($args, $request)
+    {
+        if (!$request->getContext() && ($args[0] ?? null) === 'site') {
+            $doc = $this->_createSiteSitemap($request);
+            header('Content-Type: application/xml');
+            header('Cache-Control: private');
+            header('Content-Disposition: inline; filename=sitemap_site.xml');
+            echo $doc->saveXml();
+            return;
+        }
+
+        parent::index($args, $request);
+    }
+
+    /**
+     * Include a sitemap for the multi-journal site index in the sitemap index.
+     *
+     * @copydoc PKPSitemapHandler::_createSitemapIndex()
+     */
+    public function _createSitemapIndex($request)
+    {
+        $doc = parent::_createSitemapIndex($request);
+        $root = $doc->documentElement;
+
+        $siteSitemapUrl = $request->url('index', 'sitemap', 'site');
+        $sitemap = $doc->createElement('sitemap');
+        $sitemap->appendChild($doc->createElement('loc', htmlspecialchars($siteSitemapUrl, ENT_COMPAT, 'UTF-8')));
+        $root->appendChild($sitemap);
+
+        return $doc;
+    }
+
+    /**
+     * Sitemap URLs for the site (multi-journal) landing page.
+     */
+    protected function _createSiteSitemap(Request $request): DOMDocument
+    {
+        $doc = new DOMDocument('1.0', 'utf-8');
+        $root = $doc->createElement('urlset');
+        $root->setAttribute('xmlns', SITEMAP_XSD_URL);
+        $root->appendChild($this->_createUrlTree($doc, $request->url('index', 'index')));
+        $doc->appendChild($root);
+
+        return $doc;
+    }
+
     /**
      * @copydoc PKPSitemapHandler_createContextSitemap()
      *

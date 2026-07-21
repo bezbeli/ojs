@@ -75,7 +75,7 @@ class HealthSciencesOpenGraph
         $templateMgr = TemplateManager::getManager($request);
         $publicationLocale = $publication->getData('locale');
         $title = $publication->getLocalizedFullTitle($publicationLocale);
-        $description = self::truncateDescription((string) ($publication->getLocalizedData('abstract', $publicationLocale) ?: ''));
+        $description = self::truncateDescription(self::getPublicationAbstract($publication));
         $url = $request->getRequestUrl();
 
         $image = $publication->getLocalizedCoverImageUrl($journal->getId());
@@ -103,6 +103,8 @@ class HealthSciencesOpenGraph
             'locale' => LocaleConversion::toBcp47(Locale::getLocale()),
         ]);
 
+        self::addArticleJsonLd($templateMgr, $journal, $publication, $issue, $title, $description, $url);
+
         return false;
     }
 
@@ -119,6 +121,10 @@ class HealthSciencesOpenGraph
         $journal = $request->getContext();
 
         if (!$journal) {
+            if ($template === 'frontend/pages/indexSite.tpl') {
+                self::addSiteTags($templateMgr, $request);
+            }
+
             return false;
         }
 
@@ -207,6 +213,17 @@ class HealthSciencesOpenGraph
      */
     protected static function outputTags(TemplateManager $templateMgr, array $data)
     {
+        if (!empty($data['description'])) {
+            self::addNameMeta($templateMgr, 'metaDescription', 'description', $data['description']);
+        }
+
+        if (!empty($data['url'])) {
+            $templateMgr->addHeader(
+                'seoCanonical',
+                '<link rel="canonical" href="' . htmlspecialchars($data['url'], ENT_QUOTES, 'UTF-8') . '"/>'
+            );
+        }
+
         self::addPropertyMeta($templateMgr, 'ogTitle', 'og:title', $data['title']);
         self::addPropertyMeta($templateMgr, 'ogDescription', 'og:description', $data['description']);
         self::addPropertyMeta($templateMgr, 'ogUrl', 'og:url', $data['url']);
@@ -274,7 +291,163 @@ class HealthSciencesOpenGraph
             return $text;
         }
 
-        return mb_substr($text, 0, $maxLength - 1) . '';
+        return mb_substr($text, 0, $maxLength - 1) . '?';
+    }
+
+    /**
+     * Prefer UI locale abstract, then publication locale, then any stored translation.
+     *
+     * @param \PKP\publication\Publication $publication
+     */
+    protected static function getPublicationAbstract($publication): string
+    {
+        $locale = Locale::getLocale();
+        $abstract = (string) ($publication->getLocalizedData('abstract', $locale) ?: '');
+        if (trim(strip_tags($abstract)) !== '') {
+            return $abstract;
+        }
+
+        $publicationLocale = $publication->getData('locale');
+        $abstract = (string) ($publication->getLocalizedData('abstract', $publicationLocale) ?: '');
+        if (trim(strip_tags($abstract)) !== '') {
+            return $abstract;
+        }
+
+        $abstracts = $publication->getData('abstract');
+        if (is_array($abstracts)) {
+            foreach ($abstracts as $value) {
+                if (is_string($value) && trim(strip_tags($value)) !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * @param \APP\core\Request $request
+     */
+    protected static function addSiteTags(TemplateManager $templateMgr, $request)
+    {
+        $site = $request->getSite();
+        $title = (string) ($site->getLocalizedTitle() ?: '');
+        $description = self::truncateDescription((string) ($site->getLocalizedAbout() ?: ''));
+        if ($description === '' && $title !== '') {
+            $description = $title;
+        }
+
+        self::outputTags($templateMgr, [
+            'title' => $title,
+            'description' => $description,
+            'url' => $request->getRequestUrl(),
+            'image' => '',
+            'imageMeta' => [],
+            'type' => 'website',
+            'siteName' => $title,
+            'locale' => LocaleConversion::toBcp47(Locale::getLocale()),
+        ]);
+    }
+
+    /**
+     * @param \APP\journal\Journal $journal
+     * @param \PKP\publication\Publication $publication
+     * @param null|\APP\issue\Issue $issue
+     */
+    protected static function addArticleJsonLd(
+        TemplateManager $templateMgr,
+        $journal,
+        $publication,
+        $issue,
+        string $title,
+        string $description,
+        string $url
+    ) {
+        $publicationLocale = $publication->getData('locale');
+        $authors = [];
+        foreach ($publication->getData('authors') ?? [] as $author) {
+            $authors[] = [
+                '@type' => 'Person',
+                'name' => $author->getFullName(false, false, $publicationLocale),
+            ];
+        }
+
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'ScholarlyArticle',
+            'headline' => $title,
+            'url' => $url,
+            'isPartOf' => [
+                '@type' => 'Periodical',
+                'name' => $journal->getLocalizedName(),
+            ],
+        ];
+
+        if ($description !== '') {
+            $schema['description'] = $description;
+        }
+        if ($authors !== []) {
+            $schema['author'] = $authors;
+        }
+        if ($datePublished = $publication->getData('datePublished')) {
+            $schema['datePublished'] = date('Y-m-d', strtotime($datePublished));
+        }
+        if ($doi = $publication->getDoi()) {
+            $schema['identifier'] = [
+                '@type' => 'PropertyValue',
+                'propertyID' => 'DOI',
+                'value' => $doi,
+            ];
+        }
+        if ($issue) {
+            $schema['isPartOf']['issueNumber'] = $issue->getIssueIdentification();
+        }
+
+        $json = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            return;
+        }
+
+        $templateMgr->addHeader(
+            'schemaScholarlyArticle',
+            '<script type="application/ld+json">' . $json . '</script>'
+        );
+    }
+
+    /**
+     * Remove low-value URLs from the journal sitemap (login, registration).
+     *
+     * @return bool
+     */
+    public static function filterJournalSitemap($hookName, $args)
+    {
+        $doc = &$args[0];
+        if (!$doc instanceof \DOMDocument) {
+            return false;
+        }
+
+        $xpath = new \DOMXPath($doc);
+        $locNodes = $xpath->query('//url/loc');
+        if ($locNodes === false) {
+            return false;
+        }
+
+        $urlsToRemove = [];
+        foreach ($locNodes as $locNode) {
+            $href = $locNode->textContent;
+            if (preg_match('#/(login|user/register)(/|$|\?)#', $href)) {
+                $urlNode = $locNode->parentNode;
+                if ($urlNode instanceof \DOMNode) {
+                    $urlsToRemove[] = $urlNode;
+                }
+            }
+        }
+
+        foreach ($urlsToRemove as $urlNode) {
+            $urlNode->parentNode?->removeChild($urlNode);
+        }
+
+        return false;
     }
 
     /**
